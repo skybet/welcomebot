@@ -1,0 +1,13 @@
+{
+  "dmresponses": [
+    {
+      "channel": "general",
+      "response": "example welcome message"
+    },
+    {
+      "channel": "random",
+      "response": "another example welcome message"
+    }
+  ],
+  "responses": []
+}
