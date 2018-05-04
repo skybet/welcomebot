@@ -2,12 +2,18 @@
   "dmresponses": [
     {
       "channel": "general",
-      "response": "example welcome message"
-    },
-    {
-      "channel": "random",
-      "response": "another example welcome message"
+      "response": "example welcome message, sent as a DM"
     }
   ],
-  "responses": []
+  "responses": [
+    {
+      "channel": "random",
+      "response": "another example welcome message, sent as a public message in the channel"
+    },
+    {
+      "channel": "technology-community",
+      "raw_response":true,
+      "response": "another example welcome message, sent as a public message in the channel.\nLink to \u003chttps://engineering.skybettingandgaming.com/|website\u003e"
+    }
+  ]
 }
