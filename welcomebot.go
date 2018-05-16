@@ -23,15 +23,15 @@ type dmResponse struct {
 }
 
 type ephResponse struct {
-    Channel  string `json:"channel"`
-    Raw      bool   `json:"raw_response"`
-    Response string `json:"response"`
+	Channel  string `json:"channel"`
+	Raw      bool   `json:"raw_response"`
+	Response string `json:"response"`
 }
 
 type Config struct {
 	PublicResponses []publicResponse `json:"responses"`
 	DmResponses     []dmResponse     `json:"dmresponses"`
-    EphResponses    []ephResponse    `json:"ephresponses"`
+	EphResponses    []ephResponse    `json:"ephresponses"`
 }
 
 var (
@@ -141,12 +141,12 @@ func respondToJoin(rtm *slack.RTM, ev *slack.MessageEvent, name string, config C
 		}
 	}
 
-    for _, ephResponse := range config.EphResponses {
-        if ephResponse.Channel == name {
-            log.Infof("Sending ephermal reply to channel %s", name)
-            postEphemeral(rtm, ev.Msg.Channel, ev.User, ephResponse.Response, ephResponse.Raw)
-        }
-    }
+	for _, ephResponse := range config.EphResponses {
+		if ephResponse.Channel == name {
+			log.Infof("Sending ephermal reply to channel %s", name)
+			postEphemeral(rtm, ev.Msg.Channel, ev.User, ephResponse.Response, ephResponse.Raw)
+		}
+	}
 
 }
 
