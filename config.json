@@ -15,5 +15,11 @@
       "raw_response":true,
       "response": "another example welcome message, sent as a public message in the channel.\nLink to \u003chttps://engineering.skybettingandgaming.com/|website\u003e"
     }
+  ],
+  "ephresponses": [
+    {
+      "channel": "general",
+      "response": "Pretend this is a longer message, containing a lot more information that wouldn't be useful to show to the whole channel"
+    }
   ]
 }
