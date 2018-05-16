@@ -86,7 +86,11 @@ Loop:
 
 func sendMessage(rtm *slack.RTM, channel string, message string, raw bool) {
 	if raw {
-		rtm.PostMessage(channel, message, slack.PostMessageParameters{EscapeText: false})
+		rtm.PostMessage(
+			channel,
+			message,
+			slack.PostMessageParameters{EscapeText: false, AsUser: true},
+		)
 	} else {
 		rtm.SendMessage(rtm.NewOutgoingMessage(message, channel))
 	}
@@ -97,7 +101,8 @@ func postEphemeral(rtm *slack.RTM, channel, user, text string, raw bool) (string
 	return rtm.PostEphemeral(
 		channel,
 		user,
-		slack.MsgOptionText(text, raw),
+		slack.MsgOptionText(text, !raw),
+		slack.MsgOptionAsUser(true),
 	)
 }
 
