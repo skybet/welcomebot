@@ -118,6 +118,13 @@ func respondToMessage(rtm *slack.RTM, ev *slack.MessageEvent, name string, confi
 				sendMessage(rtm, ev.Msg.Channel, dmMsg, dmResponse.Raw)
 			}
 		}
+
+		for _, ephResponse := range config.EphResponses {
+			if ephResponse.Channel == name {
+				ephMsg := fmt.Sprintf("*Ephemeral response for this channel*:\n\n%s", ephResponse.Response)
+				sendMessage(rtm, ev.Msg.Channel, ephMsg, ephResponse.Raw)
+			}
+		}
 	}
 }
 
