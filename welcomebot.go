@@ -143,7 +143,7 @@ func respondToJoin(rtm *slack.RTM, ev *slack.MessageEvent, name string, config C
 
 	for _, ephResponse := range config.EphResponses {
 		if ephResponse.Channel == name {
-			log.Infof("Sending ephermal reply to channel %s", name)
+			log.Infof("Sending ephemeral reply to channel %s", name)
 			postEphemeral(rtm, ev.Msg.Channel, ev.User, ephResponse.Response, ephResponse.Raw)
 		}
 	}
