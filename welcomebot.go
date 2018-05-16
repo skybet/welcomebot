@@ -92,6 +92,15 @@ func sendMessage(rtm *slack.RTM, channel string, message string, raw bool) {
 	}
 }
 
+// From https://github.com/nlopes/slack/issues/191#issuecomment-355394946
+func postEphemeral(rtm *slack.RTM, channel, user, text string, raw bool) (string, error) {
+	return rtm.PostEphemeral(
+		channel,
+		user,
+		slack.MsgOptionText(text, raw),
+	)
+}
+
 func respondToMessage(rtm *slack.RTM, ev *slack.MessageEvent, name string, config Config) {
 
 	acceptedGreetings := map[string]bool{
