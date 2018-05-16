@@ -17,7 +17,13 @@ type publicResponse struct {
 }
 
 type dmResponse struct {
-	Channel  string `json:channel"`
+	Channel  string `json:"channel"`
+	Raw      bool   `json:"raw_response"`
+	Response string `json:"response"`
+}
+
+type ephResponse struct {
+	Channel  string `json:"channel"`
 	Raw      bool   `json:"raw_response"`
 	Response string `json:"response"`
 }
@@ -25,6 +31,7 @@ type dmResponse struct {
 type Config struct {
 	PublicResponses []publicResponse `json:"responses"`
 	DmResponses     []dmResponse     `json:"dmresponses"`
+	EphResponses    []ephResponse    `json:"ephresponses"`
 }
 
 var (
@@ -85,6 +92,15 @@ func sendMessage(rtm *slack.RTM, channel string, message string, raw bool) {
 	}
 }
 
+// From https://github.com/nlopes/slack/issues/191#issuecomment-355394946
+func postEphemeral(rtm *slack.RTM, channel, user, text string, raw bool) (string, error) {
+	return rtm.PostEphemeral(
+		channel,
+		user,
+		slack.MsgOptionText(text, raw),
+	)
+}
+
 func respondToMessage(rtm *slack.RTM, ev *slack.MessageEvent, name string, config Config) {
 
 	acceptedGreetings := map[string]bool{
@@ -131,6 +147,13 @@ func respondToJoin(rtm *slack.RTM, ev *slack.MessageEvent, name string, config C
 			}
 			log.Infof("Sending DM to user %s", ev.User)
 			sendMessage(rtm, channel, dmResponse.Response, dmResponse.Raw)
+		}
+	}
+
+	for _, ephResponse := range config.EphResponses {
+		if ephResponse.Channel == name {
+			log.Infof("Sending ephemeral reply to %s in channel %s", ev.User, name)
+			postEphemeral(rtm, ev.Msg.Channel, ev.User, ephResponse.Response, ephResponse.Raw)
 		}
 	}
 
