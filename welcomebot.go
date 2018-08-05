@@ -51,6 +51,13 @@ func main() {
 
 Loop:
 	for {
+		for _, v := range config.PublicResponses {
+			_, err := api.JoinChannel(v.Channel)
+			if err != nil {
+				fmt.Println("Error joining public channel: %s", err)
+			}
+		}
+
 		select {
 		case msg := <-rtm.IncomingEvents:
 			switch ev := msg.Data.(type) {
