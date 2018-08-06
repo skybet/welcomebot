@@ -10,28 +10,16 @@ import (
 	"github.com/nlopes/slack"
 )
 
-type publicResponse struct {
-	Channel  string `json:"channel"`
-	Raw      bool   `json:"raw_response"`
-	Response string `json:"response"`
-}
-
-type dmResponse struct {
-	Channel  string `json:"channel"`
-	Raw      bool   `json:"raw_response"`
-	Response string `json:"response"`
-}
-
-type ephResponse struct {
+type slackResponse struct {
 	Channel  string `json:"channel"`
 	Raw      bool   `json:"raw_response"`
 	Response string `json:"response"`
 }
 
 type Config struct {
-	PublicResponses []publicResponse `json:"responses"`
-	DmResponses     []dmResponse     `json:"dmresponses"`
-	EphResponses    []ephResponse    `json:"ephresponses"`
+	PublicResponses []slackResponse `json:"responses"`
+	DmResponses     []slackResponse `json:"dmresponses"`
+	EphResponses    []slackResponse `json:"ephresponses"`
 }
 
 var (
@@ -49,8 +37,22 @@ func main() {
 
 	go rtm.ManageConnection()
 
+	// Return a slice of all channels from config.json
+	allChans := getChannelList(config.PublicResponses, config.DmResponses, config.EphResponses)
+	// Because duplicates are possible, make a new slice without duplicates
+	cleanSlice := removeDuplicates(allChans)
+
+	// Range over the cleaned up slice and join channels
+	for _, v := range cleanSlice {
+		_, err := api.JoinChannel(v)
+		if err != nil {
+			log.Errorf("Error joining public channel: %s", err)
+		}
+	}
+
 Loop:
 	for {
+
 		select {
 		case msg := <-rtm.IncomingEvents:
 			switch ev := msg.Data.(type) {
@@ -182,4 +184,30 @@ func loadConfig(file string) Config {
 	jsonParser := json.NewDecoder(configFile)
 	jsonParser.Decode(&config)
 	return config
+}
+
+func getChannelList(publicSlice, dmSlice, ephSlice []slackResponse) []string {
+	var newSlice []string
+	for _, v := range publicSlice {
+		newSlice = append(newSlice, v.Channel)
+	}
+	for _, v := range dmSlice {
+		newSlice = append(newSlice, v.Channel)
+	}
+	for _, v := range ephSlice {
+		newSlice = append(newSlice, v.Channel)
+	}
+	return newSlice
+}
+
+func removeDuplicates(channelSlice []string) []string {
+	k := make(map[string]bool)
+	slice := []string{}
+	for _, entry := range channelSlice {
+		if _, value := k[entry]; !value {
+			k[entry] = true
+			slice = append(slice, entry)
+		}
+	}
+	return slice
 }
