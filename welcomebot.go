@@ -46,7 +46,7 @@ func main() {
 	for _, v := range cleanSlice {
 		_, err := api.JoinChannel(v)
 		if err != nil {
-			log.Errorf("Error joining public channel: %s", err)
+			log.Errorf("Error joining public channel %s: %s", v, err)
 		}
 	}
 
