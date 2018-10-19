@@ -30,8 +30,10 @@ func main() {
 
 	token := os.Getenv("SLACK_TOKEN")
 	config := loadConfig("config.json")
-	api := slack.New(token)
-	api.SetDebug(false)
+	api := slack.New(
+		token,
+		slack.OptionDebug(true),
+	)
 
 	rtm := api.NewRTM()
 
@@ -86,16 +88,12 @@ Loop:
 	}
 }
 
-func sendMessage(rtm *slack.RTM, channel string, message string, raw bool) {
-	if raw {
-		rtm.PostMessage(
-			channel,
-			message,
-			slack.PostMessageParameters{EscapeText: false, AsUser: true},
-		)
-	} else {
-		rtm.SendMessage(rtm.NewOutgoingMessage(message, channel))
-	}
+func sendMessage(rtm *slack.RTM, channel string, message string, raw bool) (string, string, error) {
+	return rtm.PostMessage(
+		channel,
+		slack.MsgOptionText(message, !raw),
+		slack.MsgOptionAsUser(true),
+	)
 }
 
 // From https://github.com/nlopes/slack/issues/191#issuecomment-355394946
@@ -124,21 +122,30 @@ func respondToMessage(rtm *slack.RTM, ev *slack.MessageEvent, name string, confi
 		for _, publicResponse := range config.PublicResponses {
 			if publicResponse.Channel == name {
 				publicMsg := fmt.Sprintf("*Public response for this channel*:\n\n%s", publicResponse.Response)
-				sendMessage(rtm, ev.Msg.Channel, publicMsg, publicResponse.Raw)
+				_, _, err := sendMessage(rtm, ev.Msg.Channel, publicMsg, publicResponse.Raw)
+				if err != nil {
+					log.Warnf("Error sending message: %s", err)
+				}
 			}
 		}
 
 		for _, dmResponse := range config.DmResponses {
 			if dmResponse.Channel == name {
 				dmMsg := fmt.Sprintf("*DM response for this channel*:\n\n%s", dmResponse.Response)
-				sendMessage(rtm, ev.Msg.Channel, dmMsg, dmResponse.Raw)
+				_, _, err := sendMessage(rtm, ev.Msg.Channel, dmMsg, dmResponse.Raw)
+				if err != nil {
+					log.Warnf("Error sending message: %s", err)
+				}
 			}
 		}
 
 		for _, ephResponse := range config.EphResponses {
 			if ephResponse.Channel == name {
 				ephMsg := fmt.Sprintf("*Ephemeral response for this channel*:\n\n%s", ephResponse.Response)
-				sendMessage(rtm, ev.Msg.Channel, ephMsg, ephResponse.Raw)
+				_, _, err := sendMessage(rtm, ev.Msg.Channel, ephMsg, ephResponse.Raw)
+				if err != nil {
+					log.Warnf("Error sending message: %s", err)
+				}
 			}
 		}
 	}
@@ -149,7 +156,10 @@ func respondToJoin(rtm *slack.RTM, ev *slack.MessageEvent, name string, config C
 	for _, publicResponse := range config.PublicResponses {
 		if publicResponse.Channel == name {
 			log.Infof("Sending public reply to channel %s", name)
-			sendMessage(rtm, ev.Msg.Channel, publicResponse.Response, publicResponse.Raw)
+			_, _, err := sendMessage(rtm, ev.Msg.Channel, publicResponse.Response, publicResponse.Raw)
+			if err != nil {
+				log.Warnf("Error sending message: %s", err)
+			}
 		}
 	}
 
@@ -160,14 +170,20 @@ func respondToJoin(rtm *slack.RTM, ev *slack.MessageEvent, name string, config C
 				log.Warnf("Failed to open IM channel to user: %s", err)
 			}
 			log.Infof("Sending DM to user %s", ev.User)
-			sendMessage(rtm, channel, dmResponse.Response, dmResponse.Raw)
+			_, _, err = sendMessage(rtm, channel, dmResponse.Response, dmResponse.Raw)
+			if err != nil {
+				log.Warnf("Error sending message: %s", err)
+			}
 		}
 	}
 
 	for _, ephResponse := range config.EphResponses {
 		if ephResponse.Channel == name {
 			log.Infof("Sending ephemeral reply to %s in channel %s", ev.User, name)
-			postEphemeral(rtm, ev.Msg.Channel, ev.User, ephResponse.Response, ephResponse.Raw)
+			_, err := postEphemeral(rtm, ev.Msg.Channel, ev.User, ephResponse.Response, ephResponse.Raw)
+			if err != nil {
+				log.Warnf("Error sending message: %s", err)
+			}
 		}
 	}
 
