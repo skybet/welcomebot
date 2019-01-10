@@ -21,3 +21,19 @@ How about when someone joins a specific channel?
 > We use Monkeybot in this channel to triage issues, so attact their attention with `@monkeybot help`
 
 Example configs in `config.json`
+
+## Building and usage
+
+You will need a Slack token in order to run this.  Welcomebot expects this to be provided as the environment variable `SLACK_TOKEN`.  You will also need to provide a config.json file in the current directory.  See the example config.json in this repo for what should go into that file.
+
+The easiest way of building and running this is in Docker.  First of all build a Docker container:
+
+```
+docker build -t welcomebot .
+```
+
+And then you can run it as follows:
+
+```
+docker run -v config.json -e SLACK_TOKEN=foo welcomebot
+```
