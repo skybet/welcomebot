@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/nlopes/slack"
+	log "github.com/sirupsen/logrus"
 )
 
 type slackResponse struct {
